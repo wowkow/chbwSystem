@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.server.chbw.firm.mapper.FirmMapper">
+ 
+    <resultMap id="FirmResultMap" type="Firm">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="firmName" jdbcType="VARCHAR" property="firmName" />
+        <result column="type" jdbcType="VARCHAR" property="type" />
+        <result column="createtime" jdbcType="DATE" property="createtime" />
+        <result column="updatetime" jdbcType="DATE" property="updatetime" />
+        <result column="isvalidate" jdbcType="VARCHAR" property="isvalidate" />
+        <result column="note" jdbcType="VARCHAR" property="note" />
+    </resultMap>
+    <sql id="sqlid">
+    res_type_id,res_type
+    </sql>
+    <!--     获取厂商列表 -->
+    <select id="list" resultMap="FirmResultMap">
+        SELECT f.*
+          FROM firm_info f     
+         WHERE f.isvalidate = "1"
+         <if test="firmName !=null and firmName !=''">
+           and f.firmName like concat('%',#{firmName},'%')
+         </if>
+         <if test="type !=null and type !=''">
+           and f.type = #{type}
+         </if>
+    </select>
+    
+    <!--     根据id获取厂商 -->
+    <select id="findById" resultMap="FirmResultMap">
+        SELECT f.*
+          FROM firm_info f     
+         WHERE f.isvalidate = "1"
+           and f.id = #{id}
+    </select>
+    
+    <insert id="add">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into firm_info(firmName,type,createtime,updatetime,isvalidate,note)
+             values(#{firmName},#{type},#{createtime},#{updatetime},#{isvalidate},#{note})
+    </insert>
+    
+    <update id="edit"> 
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>   
+        UPDATE firm_info f
+			SET f.firmName =#{firmName},
+			  f.type =#{type},
+			  f.updatetime =#{updatetime},
+			  f.note =#{note},
+			  f.isvalidate =#{isvalidate}
+			WHERE f.id = #{id}
+    
+    </update>
+ 
+</mapper>

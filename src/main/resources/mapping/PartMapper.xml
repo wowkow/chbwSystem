@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.server.chbw.part.mapper.PartMapper">
+ 
+    <resultMap id="PartResultMap" type="Part">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="part_name" jdbcType="VARCHAR" property="part_name" />
+        <result column="source" jdbcType="VARCHAR" property="source" />
+        <result column="type" jdbcType="VARCHAR" property="type" />
+        <result column="unit" jdbcType="VARCHAR" property="unit" />
+        <result column="createtime" jdbcType="DATE" property="createtime" />
+        <result column="updatetime" jdbcType="DATE" property="updatetime" />
+        <result column="isvalidate" jdbcType="VARCHAR" property="isvalidate" />
+        <result column="safetime" jdbcType="VARCHAR" property="safetime" />
+        <result column="note" jdbcType="VARCHAR" property="note" />
+        <!-- 多对一的关系 -->
+        <!-- property: 指的是属性名称, javaType：指的是属性的类型 -->
+        <association property="firm" javaType="Firm">
+            <id column="id" property="id"/>
+            <result column="firmName" property="firmName"/>
+            <result column="isvalidate" property="isvalidate"/>
+        </association>
+    </resultMap>
+    <sql id="sqlid">
+    res_type_id,res_type
+    </sql>
+    <!--     获取原材料列表 -->
+    <select id="list" resultMap="PartResultMap">
+        SELECT p.*,f.*
+          FROM part_info p
+     LEFT JOIN firm_info f
+         ON p.firmid = f.id AND f.isvalidate = "1"        
+         WHERE p.isvalidate = "1"
+         <if test="id !=null and id !=''">
+           and p.id = #{id}
+         </if>
+         <if test="part_name !=null and part_name !=''">
+           and p.part_name like concat('%',#{part_name},'%')
+         </if>
+         <if test="source !=null and source !=''">
+           and p.source = #{source}
+         </if>
+         <if test="type !=null and type !=''">
+           and p.type = #{type}
+         </if>
+         <if test="firmid !=null and firmid !=''">
+           and p.firmid = #{firmid}
+         </if>
+<!--          <if test="firm !=null"> -->
+<!--              <if test="firm.id !=null and firm.id !=''"> -->
+<!--              and p.firmid = #{firm.id} -->
+<!--              </if> -->
+<!--          </if> -->
+    </select>
+    
+    <!--     根据id获取原材料 -->
+    <select id="findById" resultMap="PartResultMap">
+        SELECT p.*,f.*
+          FROM part_info p
+     LEFT JOIN firm_info f
+         ON p.firmid = f.id AND f.isvalidate = "1"        
+         WHERE p.isvalidate = "1"
+           and p.id = #{id}
+    </select>
+    
+    <insert id="add">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into part_info(part_name,source,type,firmid,unit,createtime,updatetime,isvalidate,safetime,note)
+             values(#{part_name},#{source},#{type},#{firmid},#{unit},#{createtime},#{updatetime},#{isvalidate},#{safetime},#{note})
+    </insert>
+    
+    <update id="edit"> 
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>   
+        UPDATE part_info p
+			SET p.part_name =#{part_name},
+			  p.source =#{source},
+			  p.type =#{type},
+			  p.firmid =#{firmid},
+			  p.unit =#{unit},
+			  p.updatetime =#{updatetime},
+			  p.safetime =#{safetime},
+			  p.note =#{note},
+			  p.isvalidate =#{isvalidate}
+			WHERE p.id = #{id}
+    
+    </update>
+ 
+</mapper>
